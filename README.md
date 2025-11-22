@@ -184,7 +184,7 @@ internal/
 
 ### Prerequisites
 
-- **Go 1.21+** - [Download](https://go.dev/dl/)
+- **Go 1.25+** - [Download](https://go.dev/dl/) (Latest: 1.25.4)
 - **Docker & Docker Compose** - [Download](https://docs.docker.com/get-docker/)
 - **Task** (optional) - [Install](https://taskfile.dev/installation/)
 - **golang-migrate** - [Install](https://github.com/golang-migrate/migrate/tree/master/cmd/migrate)
