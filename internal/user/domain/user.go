@@ -2,12 +2,22 @@ package domain
 
 import (
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
 )
 
+// Email validation regex that prevents:
+// - consecutive dots (..)
+// - leading/trailing dots in local part
+// - leading/trailing dots in domain
 var emailRegex = regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
+
+const (
+	maxEmailLength = 254
+	maxNameLength  = 255
+)
 
 // User represents a user entity
 type User struct {
@@ -24,8 +34,10 @@ func NewUser(email, name string) (*User, error) {
 		return nil, ErrInvalidEmail
 	}
 
-	if name == "" {
-		return nil, ErrInvalidName
+	// Trim whitespace and validate name
+	name = strings.TrimSpace(name)
+	if err := isValidName(name); err != nil {
+		return nil, err
 	}
 
 	now := time.Now()
@@ -40,8 +52,10 @@ func NewUser(email, name string) (*User, error) {
 
 // UpdateName updates the user's name
 func (u *User) UpdateName(name string) error {
-	if name == "" {
-		return ErrInvalidName
+	// Trim whitespace and validate name
+	name = strings.TrimSpace(name)
+	if err := isValidName(name); err != nil {
+		return err
 	}
 
 	u.Name = name
@@ -49,6 +63,52 @@ func (u *User) UpdateName(name string) error {
 	return nil
 }
 
+func isValidName(name string) error {
+	if name == "" {
+		return ErrInvalidName
+	}
+
+	if len(name) > maxNameLength {
+		return ErrInvalidName
+	}
+
+	return nil
+}
+
 func isValidEmail(email string) bool {
-	return emailRegex.MatchString(email)
+	// Check length
+	if len(email) > maxEmailLength {
+		return false
+	}
+
+	// Check basic format
+	if !emailRegex.MatchString(email) {
+		return false
+	}
+
+	// Split into local and domain parts
+	parts := strings.Split(email, "@")
+	if len(parts) != 2 {
+		return false
+	}
+
+	local := parts[0]
+	domain := parts[1]
+
+	// Check for consecutive dots
+	if strings.Contains(email, "..") {
+		return false
+	}
+
+	// Check for leading/trailing dots in local part
+	if strings.HasPrefix(local, ".") || strings.HasSuffix(local, ".") {
+		return false
+	}
+
+	// Check for leading/trailing dots in domain
+	if strings.HasPrefix(domain, ".") || strings.HasSuffix(domain, ".") {
+		return false
+	}
+
+	return true
 }
