@@ -55,7 +55,7 @@ This is a template repository for building Go applications following clean archi
 - Health checks for Kubernetes
 
 **Testing**:
-- Unit tests with gomock for mocking
+- Unit tests with mockery for mocking
 - Integration tests with testcontainers-go
 - E2E tests with full stack
 
@@ -393,26 +393,24 @@ type PostgresConfig struct {
 
 **Location**: Alongside code (`*_test.go`)
 **Focus**: Domain logic and service layer
-**Dependencies**: Mocked using gomock
+**Dependencies**: Mocked using mockery
 
 **Mock generation**:
 ```go
-//go:generate mockgen -source=ports/repository.go -destination=ports/mocks/mock_repository.go
+//go:generate mockery --name=UserRepository --dir=ports --output=ports/mocks
 ```
 
 **Example**:
 ```go
 func TestUserService_CreateUser(t *testing.T) {
-    ctrl := gomock.NewController(t)
-    defer ctrl.Finish()
-
-    mockRepo := mocks.NewMockUserRepository(ctrl)
+    mockRepo := new(mocks.UserRepository)
     service := service.NewUserService(mockRepo, logger)
 
-    mockRepo.EXPECT().Create(gomock.Any()).Return(nil)
+    mockRepo.On("Create", mock.Anything, mock.AnythingOfType("*domain.User")).Return(nil)
 
     err := service.CreateUser(ctx, "test@example.com", "Test User")
     assert.NoError(t, err)
+    mockRepo.AssertExpectations(t)
 }
 ```
 
@@ -682,7 +680,7 @@ tasks:
 20. Test bootstrapping each entry point
 
 ### Phase 5: Testing
-21. Set up gomock code generation
+21. Set up mockery code generation
 22. Write example unit tests
 23. Set up testcontainers for integration tests
 24. Write example integration tests
