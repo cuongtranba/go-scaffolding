@@ -55,3 +55,95 @@ app:
 	assert.Equal(t, "env-app", cfg.App.Name)
 	assert.Equal(t, 9000, cfg.App.HTTPPort)
 }
+
+func TestPostgresConfig_ConnectionString(t *testing.T) {
+	tests := []struct {
+		name     string
+		config   PostgresConfig
+		expected string
+	}{
+		{
+			name: "full connection string",
+			config: PostgresConfig{
+				Host:     "localhost",
+				Port:     5432,
+				User:     "testuser",
+				Password: "testpass",
+				Database: "testdb",
+				SSLMode:  "disable",
+			},
+			expected: "host=localhost port=5432 user=testuser password=testpass dbname=testdb sslmode=disable",
+		},
+		{
+			name: "connection string with SSL enabled",
+			config: PostgresConfig{
+				Host:     "db.example.com",
+				Port:     5433,
+				User:     "admin",
+				Password: "secret123",
+				Database: "production",
+				SSLMode:  "require",
+			},
+			expected: "host=db.example.com port=5433 user=admin password=secret123 dbname=production sslmode=require",
+		},
+		{
+			name: "connection string with empty password",
+			config: PostgresConfig{
+				Host:     "127.0.0.1",
+				Port:     5432,
+				User:     "postgres",
+				Password: "",
+				Database: "mydb",
+				SSLMode:  "disable",
+			},
+			expected: "host=127.0.0.1 port=5432 user=postgres password= dbname=mydb sslmode=disable",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.config.ConnectionString()
+			assert.Equal(t, tt.expected, result)
+		})
+	}
+}
+
+func TestRedisConfig_Address(t *testing.T) {
+	tests := []struct {
+		name     string
+		config   RedisConfig
+		expected string
+	}{
+		{
+			name: "localhost with default port",
+			config: RedisConfig{
+				Host: "localhost",
+				Port: 6379,
+			},
+			expected: "localhost:6379",
+		},
+		{
+			name: "custom host and port",
+			config: RedisConfig{
+				Host: "redis.example.com",
+				Port: 6380,
+			},
+			expected: "redis.example.com:6380",
+		},
+		{
+			name: "IP address with custom port",
+			config: RedisConfig{
+				Host: "192.168.1.100",
+				Port: 7000,
+			},
+			expected: "192.168.1.100:7000",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.config.Address()
+			assert.Equal(t, tt.expected, result)
+		})
+	}
+}
