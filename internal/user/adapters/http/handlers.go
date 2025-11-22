@@ -117,6 +117,11 @@ func (h *UserHandler) DeleteUser(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+const (
+	// MaxLimit defines the maximum number of users that can be fetched in a single request
+	MaxLimit = 100
+)
+
 // ListUsers handles GET /users
 func (h *UserHandler) ListUsers(c *gin.Context) {
 	// Parse pagination parameters with defaults
@@ -135,6 +140,14 @@ func (h *UserHandler) ListUsers(c *gin.Context) {
 		}
 	}
 
+	// Enforce maximum limit to prevent database overload
+	if limit > MaxLimit {
+		c.JSON(http.StatusBadRequest, ErrorResponse{
+			Error: "limit cannot exceed 100",
+		})
+		return
+	}
+
 	users, err := h.userService.ListUsers(c.Request.Context(), limit, offset)
 	if err != nil {
 		statusCode, errorMsg := mapDomainErrorToHTTP(err)
@@ -148,7 +161,6 @@ func (h *UserHandler) ListUsers(c *gin.Context) {
 		Users:  ToUsersResponse(users),
 		Limit:  limit,
 		Offset: offset,
-		Total:  len(users),
 	}
 
 	c.JSON(http.StatusOK, response)

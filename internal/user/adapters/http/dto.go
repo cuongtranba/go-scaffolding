@@ -13,6 +13,8 @@ type CreateUserRequest struct {
 }
 
 // UpdateUserRequest represents the request to update a user
+// Note: Email updates are not allowed to maintain data integrity and prevent
+// conflicts with existing email constraints in the database
 type UpdateUserRequest struct {
 	Name string `json:"name" binding:"required"`
 }
@@ -31,7 +33,6 @@ type ListUsersResponse struct {
 	Users  []UserResponse `json:"users"`
 	Limit  int            `json:"limit"`
 	Offset int            `json:"offset"`
-	Total  int            `json:"total"`
 }
 
 // ErrorResponse represents an error response

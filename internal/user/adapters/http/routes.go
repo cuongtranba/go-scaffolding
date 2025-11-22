@@ -14,8 +14,8 @@ func RegisterUserRoutes(router *gin.Engine, userService ports.UserService) {
 	{
 		users.POST("", handler.CreateUser)
 		users.GET("", handler.ListUsers)
+		users.GET("/email/:email", handler.GetUserByEmail) // Must be before /:id to avoid route conflict
 		users.GET("/:id", handler.GetUser)
-		users.GET("/email/:email", handler.GetUserByEmail)
 		users.PUT("/:id", handler.UpdateUser)
 		users.DELETE("/:id", handler.DeleteUser)
 	}
