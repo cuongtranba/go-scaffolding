@@ -74,10 +74,7 @@ tasks:
   wire:generate:
     desc: Generate Wire dependency injection code
     cmds:
-      - cd {{.MAIN_PATH_API}} && wire
-      - cd {{.MAIN_PATH_GRPC}} && wire
-      - cd {{.MAIN_PATH_CLI}} && wire
-      - cd {{.MAIN_PATH_WORKER}} && wire
+      - cd {{.MAIN_PATH_API}} && go run github.com/google/wire/cmd/wire
 
   proto:generate:
     desc: Generate protobuf code
