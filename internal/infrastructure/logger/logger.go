@@ -14,7 +14,7 @@ type Logger struct {
 }
 
 // New creates a new logger with the specified level
-func New(level string, writers ...io.Writer) *Logger {
+func New(level string, writer io.Writer) *Logger {
 	// Parse log level
 	logLevel, err := zerolog.ParseLevel(level)
 	if err != nil {
@@ -25,8 +25,8 @@ func New(level string, writers ...io.Writer) *Logger {
 
 	// Configure output
 	var output io.Writer
-	if len(writers) > 0 {
-		output = writers[0]
+	if writer != nil {
+		output = writer
 	} else {
 		output = os.Stdout
 		// Use console writer for development when writing to stdout

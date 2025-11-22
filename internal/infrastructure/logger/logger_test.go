@@ -55,3 +55,22 @@ func TestLogLevels(t *testing.T) {
 		})
 	}
 }
+
+func TestWith(t *testing.T) {
+	var buf bytes.Buffer
+	log := New("info", &buf)
+
+	// Create child logger with context fields
+	childLogger := log.With().Str("service", "test-service").Str("version", "1.0.0").Logger()
+
+	childLogger.Info().Msg("test message with context")
+
+	var logEntry map[string]interface{}
+	err := json.Unmarshal(buf.Bytes(), &logEntry)
+	require.NoError(t, err)
+
+	assert.Equal(t, "test message with context", logEntry["message"])
+	assert.Equal(t, "info", logEntry["level"])
+	assert.Equal(t, "test-service", logEntry["service"])
+	assert.Equal(t, "1.0.0", logEntry["version"])
+}
