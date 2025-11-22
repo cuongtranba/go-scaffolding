@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"errors"
+	"strings"
 
 	"gorm.io/gorm"
 
@@ -72,8 +73,7 @@ func (r *userRepository) GetByEmail(ctx context.Context, email string) (*domain.
 func (r *userRepository) Update(ctx context.Context, user *domain.User) error {
 	model := ToUserModel(user)
 
-	result := r.db.WithContext(ctx).Model(&UserModel{}).
-		Where("id = ?", user.ID).
+	result := r.db.WithContext(ctx).Model(&UserModel{ID: user.ID}).
 		Updates(model)
 
 	if result.Error != nil {
@@ -129,25 +129,10 @@ func isDuplicateEmailError(err error) bool {
 	errMsg := err.Error()
 
 	// PostgreSQL unique constraint violation
-	if contains(errMsg, "duplicate key value violates unique constraint") ||
-		contains(errMsg, "UNIQUE constraint failed") {
-		return contains(errMsg, "email")
+	if strings.Contains(errMsg, "duplicate key value violates unique constraint") ||
+		strings.Contains(errMsg, "UNIQUE constraint failed") {
+		return strings.Contains(errMsg, "email")
 	}
 
-	return false
-}
-
-// contains checks if a string contains a substring (case-sensitive)
-func contains(s, substr string) bool {
-	return len(s) >= len(substr) && (s == substr || len(substr) == 0 ||
-		(len(s) > 0 && len(substr) > 0 && containsHelper(s, substr)))
-}
-
-func containsHelper(s, substr string) bool {
-	for i := 0; i <= len(s)-len(substr); i++ {
-		if s[i:i+len(substr)] == substr {
-			return true
-		}
-	}
 	return false
 }

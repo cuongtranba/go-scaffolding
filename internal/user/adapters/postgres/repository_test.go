@@ -281,4 +281,15 @@ func TestRepository_List(t *testing.T) {
 		assert.NotNil(t, retrieved)
 		assert.Len(t, retrieved, 0)
 	})
+
+	t.Run("returns users in DESC order (newest first)", func(t *testing.T) {
+		retrieved, err := repo.List(ctx, 10, 0)
+		assert.NoError(t, err)
+		assert.Len(t, retrieved, 3)
+
+		// Verify DESC order - newest user should be first
+		assert.Equal(t, users[2].ID, retrieved[0].ID, "First user should be the newest (User Three)")
+		assert.Equal(t, users[1].ID, retrieved[1].ID, "Second user should be User Two")
+		assert.Equal(t, users[0].ID, retrieved[2].ID, "Third user should be the oldest (User One)")
+	})
 }

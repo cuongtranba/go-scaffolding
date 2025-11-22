@@ -11,7 +11,7 @@ type UserModel struct {
 	ID        string         `gorm:"type:uuid;primaryKey"`
 	Email     string         `gorm:"type:varchar(254);uniqueIndex;not null"`
 	Name      string         `gorm:"type:varchar(255);not null"`
-	CreatedAt time.Time      `gorm:"not null"`
+	CreatedAt time.Time      `gorm:"index;not null"`
 	UpdatedAt time.Time      `gorm:"not null"`
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 }
