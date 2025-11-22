@@ -1,0 +1,178 @@
+version: '3'
+
+vars:
+  BINARY_NAME: go-scaffolding
+  BUILD_DIR: ./bin
+  MAIN_PATH_API: ./cmd/api
+  MAIN_PATH_GRPC: ./cmd/grpc-server
+  MAIN_PATH_CLI: ./cmd/cli
+  MAIN_PATH_WORKER: ./cmd/worker
+
+tasks:
+  default:
+    desc: List available tasks
+    cmds:
+      - task --list
+
+  # Development
+  run:api:
+    desc: Start HTTP API server
+    cmds:
+      - go run {{.MAIN_PATH_API}}/main.go
+
+  run:grpc:
+    desc: Start gRPC server
+    cmds:
+      - go run {{.MAIN_PATH_GRPC}}/main.go
+
+  run:cli:
+    desc: Run CLI application
+    cmds:
+      - go run {{.MAIN_PATH_CLI}}/main.go
+
+  run:worker:
+    desc: Start background worker
+    cmds:
+      - go run {{.MAIN_PATH_WORKER}}/main.go
+
+  # Testing
+  test:
+    desc: Run unit tests
+    cmds:
+      - go test -v -race -coverprofile=coverage.out ./...
+
+  test:integration:
+    desc: Run integration tests
+    cmds:
+      - go test -v -race -tags=integration ./...
+
+  test:e2e:
+    desc: Run E2E tests
+    cmds:
+      - go test -v -race -tags=e2e ./test/e2e/...
+
+  test:all:
+    desc: Run all tests
+    cmds:
+      - task: test
+      - task: test:integration
+      - task: test:e2e
+
+  test:coverage:
+    desc: Run tests with coverage report
+    cmds:
+      - go test -v -race -coverprofile=coverage.out ./...
+      - go tool cover -html=coverage.out -o coverage.html
+      - echo "Coverage report generated at coverage.html"
+
+  # Code generation
+  mock:generate:
+    desc: Generate mocks using mockery
+    cmds:
+      - go generate ./...
+
+  wire:generate:
+    desc: Generate Wire dependency injection code
+    cmds:
+      - cd {{.MAIN_PATH_API}} && wire
+      - cd {{.MAIN_PATH_GRPC}} && wire
+      - cd {{.MAIN_PATH_CLI}} && wire
+      - cd {{.MAIN_PATH_WORKER}} && wire
+
+  proto:generate:
+    desc: Generate protobuf code
+    cmds:
+      - protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative api/proto/**/*.proto
+
+  generate:all:
+    desc: Run all code generation
+    cmds:
+      - task: proto:generate
+      - task: wire:generate
+      - task: mock:generate
+
+  # Docker
+  docker:up:
+    desc: Start docker-compose stack
+    cmds:
+      - docker-compose up -d
+
+  docker:down:
+    desc: Stop docker-compose stack
+    cmds:
+      - docker-compose down
+
+  docker:logs:
+    desc: View docker-compose logs
+    cmds:
+      - docker-compose logs -f
+
+  docker:clean:
+    desc: Clean docker volumes and containers
+    cmds:
+      - docker-compose down -v
+
+  # Database migrations
+  migrate:up:
+    desc: Run database migrations
+    cmds:
+      - migrate -path ./migrations -database "postgresql://postgres:postgres@localhost:5432/app?sslmode=disable" up
+
+  migrate:down:
+    desc: Rollback database migrations
+    cmds:
+      - migrate -path ./migrations -database "postgresql://postgres:postgres@localhost:5432/app?sslmode=disable" down 1
+
+  migrate:create:
+    desc: "Create new migration (usage: task migrate:create -- migration_name)"
+    cmds:
+      - migrate create -ext sql -dir ./migrations -seq {{.CLI_ARGS}}
+
+  # Build
+  build:api:
+    desc: Build API binary
+    cmds:
+      - go build -o {{.BUILD_DIR}}/api {{.MAIN_PATH_API}}
+
+  build:grpc:
+    desc: Build gRPC binary
+    cmds:
+      - go build -o {{.BUILD_DIR}}/grpc-server {{.MAIN_PATH_GRPC}}
+
+  build:cli:
+    desc: Build CLI binary
+    cmds:
+      - go build -o {{.BUILD_DIR}}/cli {{.MAIN_PATH_CLI}}
+
+  build:worker:
+    desc: Build worker binary
+    cmds:
+      - go build -o {{.BUILD_DIR}}/worker {{.MAIN_PATH_WORKER}}
+
+  build:all:
+    desc: Build all binaries
+    cmds:
+      - task: build:api
+      - task: build:grpc
+      - task: build:cli
+      - task: build:worker
+
+  # Code quality
+  lint:
+    desc: Run linters
+    cmds:
+      - golangci-lint run ./...
+
+  format:
+    desc: Format code
+    cmds:
+      - go fmt ./...
+      - goimports -w .
+
+  # Cleanup
+  clean:
+    desc: Clean build artifacts and caches
+    cmds:
+      - rm -rf {{.BUILD_DIR}}
+      - rm -f coverage.out coverage.html
+      - go clean -cache -testcache -modcache
