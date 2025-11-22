@@ -1,6 +1,27 @@
 # Go Clean Architecture Template
 
+<div align="center">
+
+[![Go Version](https://img.shields.io/badge/Go-1.25+-00ADD8?style=for-the-badge&logo=go)](https://go.dev/)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](./LICENSE)
+[![Template](https://img.shields.io/badge/Use_This-Template-success?style=for-the-badge&logo=github)](https://github.com/yourusername/go-scaffolding/generate)
+
 A production-ready Go template repository implementing **Hexagonal Architecture (Ports & Adapters)** with feature-sliced structure. This template provides a solid foundation for building scalable REST APIs, gRPC services, CLI applications, and background workers.
+
+[Getting Started](#getting-started) •
+[Architecture](#architecture) •
+[Documentation](./docs/) •
+[Examples](#api-documentation)
+
+</div>
+
+---
+
+> **🎯 This is a GitHub Template Repository!**
+>
+> Click the **"Use this template"** button above to create your own project based on this architecture.
+>
+> For setup instructions, see [TEMPLATE_SETUP.md](./TEMPLATE_SETUP.md)
 
 ## Table of Contents
 

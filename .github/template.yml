@@ -1,0 +1,9 @@
+# Template repository configuration
+# This file helps GitHub understand how to use this as a template
+
+# Files to exclude when creating a new repository from this template
+exclude:
+  - .github/workflows/template-sync.yml
+  - docs/plans/
+  - coverage.out
+  - coverage.html

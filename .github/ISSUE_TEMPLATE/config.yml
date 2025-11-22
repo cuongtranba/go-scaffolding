@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Discussions
+    url: https://github.com/yourusername/go-scaffolding/discussions
+    about: Ask questions and discuss with the community
+  - name: 📚 Documentation
+    url: https://github.com/yourusername/go-scaffolding/blob/master/README.md
+    about: Read the documentation
+  - name: 🏗️ Architecture Guide
+    url: https://github.com/yourusername/go-scaffolding/blob/master/docs/architecture/overview.md
+    about: Learn about the architecture
