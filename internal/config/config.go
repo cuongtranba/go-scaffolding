@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/spf13/viper"
 )
@@ -22,16 +23,21 @@ type AppConfig struct {
 	Environment string `mapstructure:"environment"`
 	HTTPPort    int    `mapstructure:"http_port"`
 	GRPCPort    int    `mapstructure:"grpc_port"`
+	LogLevel    string `mapstructure:"log_level"`
 }
 
 // PostgresConfig holds PostgreSQL configuration
 type PostgresConfig struct {
-	Host     string `mapstructure:"host"`
-	Port     int    `mapstructure:"port"`
-	Database string `mapstructure:"database"`
-	User     string `mapstructure:"user"`
-	Password string `mapstructure:"password"`
-	SSLMode  string `mapstructure:"sslmode"`
+	Host            string        `mapstructure:"host"`
+	Port            int           `mapstructure:"port"`
+	Database        string        `mapstructure:"database"`
+	User            string        `mapstructure:"user"`
+	Password        string        `mapstructure:"password"`
+	SSLMode         string        `mapstructure:"sslmode"`
+	MaxIdleConns    int           `mapstructure:"max_idle_conns"`
+	MaxOpenConns    int           `mapstructure:"max_open_conns"`
+	ConnMaxLifetime time.Duration `mapstructure:"conn_max_lifetime"`
+	LogLevel        string        `mapstructure:"log_level"`
 }
 
 // MongoDBConfig holds MongoDB configuration
@@ -63,7 +69,12 @@ func Load(configPath string) (*Config, error) {
 	v.SetDefault("app.environment", "development")
 	v.SetDefault("app.http_port", 8080)
 	v.SetDefault("app.grpc_port", 9090)
+	v.SetDefault("app.log_level", "info")
 	v.SetDefault("postgres.sslmode", "disable")
+	v.SetDefault("postgres.max_idle_conns", 10)
+	v.SetDefault("postgres.max_open_conns", 100)
+	v.SetDefault("postgres.conn_max_lifetime", "1h")
+	v.SetDefault("postgres.log_level", "warn")
 	v.SetDefault("redis.db", 0)
 	v.SetDefault("observability.log_level", "info")
 

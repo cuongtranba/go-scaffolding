@@ -3,6 +3,7 @@ app:
   environment: development
   http_port: 8080
   grpc_port: 9090
+  log_level: info
 
 postgres:
   host: localhost
@@ -11,6 +12,10 @@ postgres:
   user: postgres
   password: postgres
   sslmode: disable
+  max_idle_conns: 10
+  max_open_conns: 100
+  conn_max_lifetime: 1h
+  log_level: warn
 
 mongodb:
   uri: mongodb://admin:admin@localhost:27017

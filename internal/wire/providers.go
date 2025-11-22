@@ -1,6 +1,7 @@
 package wire
 
 import (
+	"context"
 	"os"
 
 	"github.com/gin-gonic/gin"
@@ -42,9 +43,20 @@ func ProvideLogger(cfg *config.Config) *logger.Logger {
 	return logger.New(cfg.App.LogLevel, os.Stdout)
 }
 
-// ProvideHealthChecker provides the health checker instance
-func ProvideHealthChecker() *health.Checker {
-	return health.NewChecker()
+// ProvideHealthChecker provides the health checker instance with database check
+func ProvideHealthChecker(db *gorm.DB) *health.Checker {
+	checker := health.NewChecker()
+
+	// Register database health check
+	checker.AddCheck("database", func(ctx context.Context) error {
+		sqlDB, err := db.DB()
+		if err != nil {
+			return err
+		}
+		return sqlDB.PingContext(ctx)
+	})
+
+	return checker
 }
 
 // ProvidePostgresDB provides the PostgreSQL database connection
